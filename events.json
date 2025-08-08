@@ -1,0 +1,26 @@
+{
+  "events": [
+    {
+      "date": "aug 8, 2025",
+      "time": "5:30 pm",
+      "venue": "new york state capitol",
+      "description": "capitol friday evening tour—explore new york's history.",
+      "category": "tour/history",
+      "is_new": true,
+      "link": "https://empirestateplaza.ny.gov/capitol",
+      "venue_info": {
+        "description": "historic seat of ny government.",
+        "photo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/New_York_State_Capitol_2020.jpg/800px-New_York_State_Capitol_2020.jpg",
+        "yelp_url": "https://www.yelp.com/biz/new-york-state-capitol-albany",
+        "maps_url": "https://maps.google.com/?q=new+york+state+capitol+albany"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "title": "events calendar - discover albany",
+      "url": "https://www.albany.org/things-to-do/events-calendar/"
+    }
+  ],
+  "last_updated": "2025-08-08T00:00:00Z"
+}

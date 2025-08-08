@@ -1,0 +1,46 @@
+{
+  "model": "grok-4",
+  "temperature": 0.7,
+  "max_tokens": 2048,
+  "sources": [
+    "Albany.com events calendar",
+    "Times Union weekly picks",
+    "Eventbrite for Capital District",
+    "Empire State Plaza site"
+  ],
+  "instructions": "Aggregate from reliable, non-commercial sources; avoid ads or low-quality events. Include sources in output.",
+  "region": "New York's Capital District (Albany, Schenectady, Troy, Saratoga, and surrounding areas)",
+  "timeframe": "Upcoming events for the next 7-14 days, starting from current date.",
+  "user_predilections": [
+    "focus on music and festivals",
+    "exclude commercial/DIY events",
+    "prioritize outdoor or free activities",
+    "min_faves:10 for popularity filter"
+  ],
+  "branding": "Include subtle branding like 'New Chitte' for recent events; ensure output is clean and punny where appropriate.",
+  "json_schema": {
+    "events": [
+      {
+        "date": "string",
+        "time": "string",
+        "venue": "string",
+        "description": "string",
+        "category": "string",
+        "is_new": "boolean",
+        "link": "string (optional)",
+        "venue_info": {
+          "yelp_url": "string",
+          "maps_url": "string",
+          "photo_url": "string",
+          "description": "string"
+        }
+      }
+    ],
+    "sources": [
+      {
+        "title": "string",
+        "url": "string"
+      }
+    ]
+  }
+}
