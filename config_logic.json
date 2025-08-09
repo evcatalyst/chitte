@@ -6,16 +6,24 @@
     "Albany.com events calendar",
     "Times Union weekly picks",
     "Eventbrite for Capital District",
-    "Empire State Plaza site"
+    "Empire State Plaza site",
+    "Albany Institute of History & Art",
+    "all theatres in the capital region",
+    "barpeople.com",
+    "two buttons deep",
+    "the daily gazette",
+    "news about new restaurants"
+
   ],
   "instructions": "Aggregate from reliable, non-commercial sources; avoid ads or low-quality events. Include sources in output.",
   "region": "New York's Capital District (Albany, Schenectady, Troy, Saratoga, and surrounding areas)",
-  "timeframe": "Upcoming events for the next 7-14 days, starting from current date.",
+  "timeframe": "Upcoming events for the next 30-60 days, starting from current date.",
   "user_predilections": [
-    "focus on music and festivals",
+    "focus on music and festivals, theatre, art, new restaurants, and outdoor activities",
     "exclude commercial/DIY events",
-    "prioritize outdoor or free activities",
-    "min_faves:10 for popularity filter"
+    "prioritize outdoor or free activities, but indoor stuff is essential in albany",
+    "min_faves:10 for popularity filter",
+    "have a lot of options - perhaps focus on upcoming events in the next 30-60 days"
   ],
   "branding": "Include subtle branding like 'New Chitte' for recent events; ensure output is clean and punny where appropriate.",
   "json_schema": {
