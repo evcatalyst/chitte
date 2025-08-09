@@ -4,7 +4,7 @@ import requests
 from datetime import datetime
 
 CONFIG_PATH = "config_logic.json"
-EVENTS_PATH = "events.json"
+EVENTS_PATH = "www/events.json"
 API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = os.getenv("GROK_API_KEY")
 
