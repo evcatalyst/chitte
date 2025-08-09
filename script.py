@@ -5,7 +5,7 @@ from datetime import datetime
 
 CONFIG_PATH = "config_logic.json"
 EVENTS_PATH = "events.json"
-API_URL = "https://api.x.ai/v1/chat"
+API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = os.getenv("GROK_API_KEY")
 
 def load_config():
@@ -18,7 +18,7 @@ def build_prompt(config):
     prompt = (
         f"Aggregate upcoming events for New York's Capital District (Albany, Schenectady, Troy, Saratoga, and surrounding areas) "
         f"from these sources: {sources}. "
-        f"Timeframe: next 7-14 days from today. "
+        f"Timeframe: next 30 days from today. "
         f"Instructions: {config.get('instructions', '')} "
         f"User predilections: {predilections}. "
         f"Branding: {config.get('branding', '')} "
@@ -31,11 +31,16 @@ def call_grok_api(prompt, config):
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
+    # Use grok-4-0709 as primary, fallback to grok-3 if needed
+    model = config.get("model", "grok-4-0709")
     payload = {
-        "model": config.get("model", "grok-4"),
-        "messages": [{"role": "user", "content": prompt}],
+        "model": model,
+        "messages": [
+            {"role": "system", "content": "You are an expert event aggregator. Return only valid JSON as specified."},
+            {"role": "user", "content": prompt}
+        ],
         "temperature": config.get("temperature", 0.7),
-        "max_tokens": config.get("max_tokens", 2048)
+        "stream": False
     }
     try:
         resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
@@ -57,6 +62,27 @@ def call_grok_api(prompt, config):
         return result
     except Exception as e:
         print(f"Error calling Grok API: {e}")
+        # Fallback to grok-3 if grok-4-0709 fails
+        if model != "grok-3":
+            print("Retrying with grok-3...")
+            payload["model"] = "grok-3"
+            try:
+                resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+                resp.raise_for_status()
+                data = resp.json()
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                try:
+                    result = json.loads(content)
+                except Exception:
+                    import re
+                    match = re.search(r'({.*})', content, re.DOTALL)
+                    if match:
+                        result = json.loads(match.group(1))
+                    else:
+                        raise ValueError("No valid JSON found in API response.")
+                return result
+            except Exception as e2:
+                print(f"Error calling Grok API with grok-3: {e2}")
         return None
 
 def save_events(data):
