@@ -98,6 +98,24 @@ def call_grok_api(prompt, config):
 
 def save_events(data):
     print(f"Saving events to {EVENTS_PATH}...")
+    # Enforce full event schema for each event
+    def default_venue_info():
+        return {
+            "yelp_url": "",
+            "maps_url": "",
+            "photo_url": "",
+            "description": ""
+        }
+
+    for event in data.get("events", []):
+        event.setdefault("date", "")
+        event.setdefault("time", "")
+        event.setdefault("venue", event.get("location", ""))
+        event.setdefault("description", "")
+        event.setdefault("category", "")
+        event.setdefault("is_new", False)
+        event.setdefault("link", "")
+        event.setdefault("venue_info", default_venue_info())
     data["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     with open(EVENTS_PATH, "w") as f:
         json.dump(data, f, indent=2)
