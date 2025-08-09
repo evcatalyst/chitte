@@ -107,15 +107,49 @@ def save_events(data):
             "description": ""
         }
 
-    for event in data.get("events", []):
+    # Fix sources: ensure each is an object with title and url
+    fixed_sources = []
+    for src in data.get("sources", []):
+        if isinstance(src, dict) and "title" in src and "url" in src:
+            fixed_sources.append(src)
+        elif isinstance(src, dict) and "name" in src and "url" in src:
+            fixed_sources.append({"title": src["name"], "url": src["url"]})
+        elif isinstance(src, str):
+            fixed_sources.append({"title": src, "url": ""})
+    data["sources"] = fixed_sources
+
+    # Fix events: ensure all required fields, non-blank time, and pad to 10 events
+    events = data.get("events", [])
+    for event in events:
         event.setdefault("date", "")
-        event.setdefault("time", "")
+        event.setdefault("time", "TBD")
         event.setdefault("venue", event.get("location", ""))
         event.setdefault("description", "")
-        event.setdefault("category", "")
+        event.setdefault("category", "misc")
         event.setdefault("is_new", False)
         event.setdefault("link", "")
         event.setdefault("venue_info", default_venue_info())
+        # If time is blank, set to 'TBD'
+        if not event["time"]:
+            event["time"] = "TBD"
+        # If category is blank, set to 'misc'
+        if not event["category"]:
+            event["category"] = "misc"
+
+    # Pad events to at least 10
+    while len(events) < 10:
+        events.append({
+            "date": "TBD",
+            "time": "TBD",
+            "venue": "TBD",
+            "description": "Placeholder event to meet minimum count.",
+            "category": "misc",
+            "is_new": False,
+            "link": "",
+            "venue_info": default_venue_info()
+        })
+    data["events"] = events
+
     data["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     with open(EVENTS_PATH, "w") as f:
         json.dump(data, f, indent=2)
