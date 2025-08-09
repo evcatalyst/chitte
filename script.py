@@ -9,8 +9,11 @@ API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = os.getenv("GROK_API_KEY")
 
 def load_config():
+    print(f"Loading config from {CONFIG_PATH}...")
     with open(CONFIG_PATH, "r") as f:
-        return json.load(f)
+        config = json.load(f)
+    print(f"Config loaded: {json.dumps(config, indent=2)}")
+    return config
 
 def build_prompt(config):
     sources = ", ".join(config.get("sources", []))
@@ -24,6 +27,7 @@ def build_prompt(config):
         f"Branding: {config.get('branding', '')} "
         f"Output strictly as JSON object with 'events' array and 'sources' array conforming to this schema; no extra text."
     )
+    print(f"Prompt built: {prompt}")
     return prompt
 
 def call_grok_api(prompt, config):
@@ -31,7 +35,6 @@ def call_grok_api(prompt, config):
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-    # Use grok-4-0709 as primary, fallback to grok-3 if needed
     model = config.get("model", "grok-3-mini")
     payload = {
         "model": model,
@@ -43,35 +46,40 @@ def call_grok_api(prompt, config):
         "stream": False,
         "response_format": {"type": "json_object"}
     }
+    print(f"Calling Grok API with payload: {json.dumps(payload, indent=2)}")
     try:
         resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        print(f"API response status: {resp.status_code}")
         resp.raise_for_status()
         data = resp.json()
-        # Extract JSON from response (may be in 'choices' or 'content')
+        print(f"Raw API response: {json.dumps(data, indent=2)}")
         content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        # Try to parse JSON from content
+        print(f"API content: {content}")
         try:
             result = json.loads(content)
         except Exception:
-            # Fallback: find first JSON object in content
             import re
             match = re.search(r'({.*})', content, re.DOTALL)
             if match:
                 result = json.loads(match.group(1))
             else:
+                print("No valid JSON found in API response content.")
                 raise ValueError("No valid JSON found in API response.")
+        print(f"Parsed result: {json.dumps(result, indent=2)}")
         return result
     except Exception as e:
         print(f"Error calling Grok API: {e}")
-        # Fallback to grok-3 if grok-4-0709 fails
         if model != "grok-3":
             print("Retrying with grok-3...")
             payload["model"] = "grok-3"
             try:
                 resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+                print(f"API response status (grok-3): {resp.status_code}")
                 resp.raise_for_status()
                 data = resp.json()
+                print(f"Raw API response (grok-3): {json.dumps(data, indent=2)}")
                 content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                print(f"API content (grok-3): {content}")
                 try:
                     result = json.loads(content)
                 except Exception:
@@ -80,17 +88,20 @@ def call_grok_api(prompt, config):
                     if match:
                         result = json.loads(match.group(1))
                     else:
+                        print("No valid JSON found in API response content (grok-3).")
                         raise ValueError("No valid JSON found in API response.")
+                print(f"Parsed result (grok-3): {json.dumps(result, indent=2)}")
                 return result
             except Exception as e2:
                 print(f"Error calling Grok API with grok-3: {e2}")
         return None
 
 def save_events(data):
-    # Add last updated field
+    print(f"Saving events to {EVENTS_PATH}...")
     data["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     with open(EVENTS_PATH, "w") as f:
         json.dump(data, f, indent=2)
+    print(f"Events saved: {json.dumps(data, indent=2)}")
 
 def main():
     if not API_KEY:
@@ -100,6 +111,7 @@ def main():
     prompt = build_prompt(config)
     data = call_grok_api(prompt, config)
     if data and "events" in data and "sources" in data:
+        print(f"Events found: {len(data['events'])}, Sources found: {len(data['sources'])}")
         save_events(data)
         print("Events updated successfully.")
     else:
