@@ -1,0 +1,23 @@
+name: Test Events Data
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - events.json
+      - test_events.py
+
+jobs:
+  test-events:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install unittest
+      - name: Run events.json tests
+        run: python test_events.py
