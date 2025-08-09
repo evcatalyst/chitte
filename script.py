@@ -25,6 +25,8 @@ def build_prompt(config):
         f"Instructions: {config.get('instructions', '')} "
         f"User predilections: {predilections}. "
         f"Branding: {config.get('branding', '')} "
+        f"You must return at least 10 valid events for the Albany area, each with all required fields (date, time, venue, description, category, is_new, link, venue_info). "
+        f"If there are not enough valid events, fill the gaps using events from Times Union Center / MVP Arena. "
         f"Output strictly as JSON object with 'events' array and 'sources' array conforming to this schema; no extra text."
     )
     print(f"Prompt built: {prompt}")
@@ -128,7 +130,13 @@ def save_events(data):
         event.setdefault("category", "misc")
         event.setdefault("is_new", False)
         event.setdefault("link", "")
-        event.setdefault("venue_info", default_venue_info())
+        # Ensure venue_info is a dict with all required fields
+        vi = event.get("venue_info", {})
+        if not isinstance(vi, dict):
+            vi = {"yelp_url": "", "maps_url": "", "photo_url": "", "description": str(vi)}
+        for k in ["yelp_url", "maps_url", "photo_url", "description"]:
+            vi.setdefault(k, "")
+        event["venue_info"] = vi
         # If time is blank, set to 'TBD'
         if not event["time"]:
             event["time"] = "TBD"
