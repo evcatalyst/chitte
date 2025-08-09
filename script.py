@@ -32,7 +32,7 @@ def call_grok_api(prompt, config):
         "Content-Type": "application/json"
     }
     # Use grok-4-0709 as primary, fallback to grok-3 if needed
-    model = config.get("model", "grok-4-0709")
+    model = config.get("model", "grok-3-mini")
     payload = {
         "model": model,
         "messages": [
@@ -40,7 +40,8 @@ def call_grok_api(prompt, config):
             {"role": "user", "content": prompt}
         ],
         "temperature": config.get("temperature", 0.7),
-        "stream": False
+        "stream": False,
+        "response_format": {"type": "json_object"}
     }
     try:
         resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
