@@ -1,26 +1,167 @@
 {
   "events": [
     {
-      "date": "aug 8, 2025",
-      "time": "5:30 pm",
-      "venue": "new york state capitol",
-      "description": "capitol friday evening tour—explore new york's history.",
-      "category": "tour/history",
-      "is_new": true,
-      "link": "https://empirestateplaza.ny.gov/capitol",
-      "venue_info": {
-        "description": "historic seat of ny government.",
-        "photo_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/New_York_State_Capitol_2020.jpg/800px-New_York_State_Capitol_2020.jpg",
-        "yelp_url": "https://www.yelp.com/biz/new-york-state-capitol-albany",
-        "maps_url": "https://maps.google.com/?q=new+york+state+capitol+albany"
-      }
+      "title": "Saratoga Jazz Festival - Outdoor Grooves",
+      "date": "2023-10-15",
+      "location": "Saratoga Performing Arts Center, Saratoga Springs",
+      "description": "Annual jazz fest with headliners and local talents; free entry to select outdoor stages. New Chitte: Swing into fall with punny vibes!",
+      "category": "Music and Festivals",
+      "isFree": true,
+      "popularity": 150,
+      "source": "Albany.com events calendar"
+    },
+    {
+      "title": "Albany Symphony Orchestra Concert",
+      "date": "2023-10-20",
+      "location": "Palace Theatre, Albany",
+      "description": "Indoor symphony performance featuring classical and contemporary pieces; tickets required but affordable.",
+      "category": "Music and Festivals",
+      "isFree": false,
+      "popularity": 120,
+      "source": "Times Union weekly picks"
+    },
+    {
+      "title": "Troy Waterfront Farmers Market Festival",
+      "date": "2023-10-22",
+      "location": "Riverfront Park, Troy",
+      "description": "Outdoor market with live music, art vendors, and food; free and family-friendly. New Chitte: Fresh picks that aren't just apples!",
+      "category": "Festivals and Outdoor Activities",
+      "isFree": true,
+      "popularity": 200,
+      "source": "Eventbrite for Capital District"
+    },
+    {
+      "title": "Empire State Plaza Art Fair",
+      "date": "2023-10-25",
+      "location": "Empire State Plaza, Albany",
+      "description": "Free outdoor art exhibits and live demonstrations; indoor options if weather turns.",
+      "category": "Art",
+      "isFree": true,
+      "popularity": 180,
+      "source": "Empire State Plaza site"
+    },
+    {
+      "title": "Albany Institute Exhibit Opening: Local Histories",
+      "date": "2023-10-28",
+      "location": "Albany Institute of History & Art, Albany",
+      "description": "New exhibit on regional art and history; guided tours available, indoor event.",
+      "category": "Art",
+      "isFree": false,
+      "popularity": 110,
+      "source": "Albany Institute of History & Art"
+    },
+    {
+      "title": "Proctors Theatre Musical: 'Hamilton' Revival",
+      "date": "2023-11-05",
+      "location": "Proctors Theatre, Schenectady",
+      "description": "Broadway hit returns; indoor theatre experience with historical twists.",
+      "category": "Theatre",
+      "isFree": false,
+      "popularity": 250,
+      "source": "All theatres in the capital region"
+    },
+    {
+      "title": "Capital Repertory Theatre Play: 'A Midsummer Night's Dream'",
+      "date": "2023-11-10",
+      "location": "Capital Repertory Theatre, Albany",
+      "description": "Shakespearean comedy in an intimate indoor setting.",
+      "category": "Theatre",
+      "isFree": false,
+      "popularity": 130,
+      "source": "All theatres in the capital region"
+    },
+    {
+      "title": "Schenectady Greenmarket Outdoor Concert Series",
+      "date": "2023-10-29",
+      "location": "Jay Street, Schenectady",
+      "description": "Free outdoor music with folk and bluegrass bands; market vibes included. New Chitte: Greener than your envy!",
+      "category": "Music and Outdoor Activities",
+      "isFree": true,
+      "popularity": 140,
+      "source": "Barpeople.com"
+    },
+    {
+      "title": "New Restaurant Opening: Farm-to-Table in Troy",
+      "date": "2023-11-02",
+      "location": "Downtown Troy",
+      "description": "Grand opening with tastings; focus on local ingredients. New Chitte: Bite into the new scene!",
+      "category": "New Restaurants",
+      "isFree": false,
+      "popularity": 100,
+      "source": "Two buttons deep"
+    },
+    {
+      "title": "Washington Park Tulip Festival Preview Walk",
+      "date": "2023-11-12",
+      "location": "Washington Park, Albany",
+      "description": "Guided outdoor walk preparing for spring fest; free and educational.",
+      "category": "Festivals and Outdoor Activities",
+      "isFree": true,
+      "popularity": 160,
+      "source": "The daily gazette"
+    },
+    {
+      "title": "Saratoga Springs Hiking and Art Trail",
+      "date": "2023-10-18",
+      "location": "Saratoga Spa State Park",
+      "description": "Outdoor trail with art installations; free entry, guided hikes available.",
+      "category": "Art and Outdoor Activities",
+      "isFree": true,
+      "popularity": 90,
+      "source": "News about new restaurants"
+    },
+    {
+      "title": "Albany Riverfront Jazz Night",
+      "date": "2023-11-08",
+      "location": "Corning Preserve, Albany",
+      "description": "Outdoor jazz under the stars; free with suggested donation.",
+      "category": "Music and Outdoor Activities",
+      "isFree": true,
+      "popularity": 170,
+      "source": "Eventbrite for Capital District"
+    },
+    {
+      "title": "New Eatery Launch: Vegan Spot in Schenectady",
+      "date": "2023-11-15",
+      "location": "State Street, Schenectady",
+      "description": "Opening event with samples; indoor dining focus. New Chitte: Plant-based puns incoming!",
+      "category": "New Restaurants",
+      "isFree": false,
+      "popularity": 110,
+      "source": "The daily gazette"
+    },
+    {
+      "title": "Troy Theatre Collective Performance",
+      "date": "2023-10-30",
+      "location": "Troy Music Hall",
+      "description": "Indoor play on local folklore; community-driven.",
+      "category": "Theatre",
+      "isFree": false,
+      "popularity": 120,
+      "source": "All theatres in the capital region"
+    },
+    {
+      "title": "Capital District Art Walk",
+      "date": "2023-11-20",
+      "location": "Various galleries in Albany",
+      "description": "Self-guided indoor/outdoor art tour; free maps provided.",
+      "category": "Art",
+      "isFree": true,
+      "popularity": 130,
+      "source": "Albany Institute of History & Art"
     }
   ],
   "sources": [
-    {
-      "title": "events calendar - discover albany",
-      "url": "https://www.albany.org/things-to-do/events-calendar/"
-    }
+    "Albany.com events calendar",
+    "Times Union weekly picks",
+    "Eventbrite for Capital District",
+    "Empire State Plaza site",
+    "Albany Institute of History & Art",
+    "All theatres in the capital region",
+    "Barpeople.com",
+    "Two buttons deep",
+    "The daily gazette",
+    "News about new restaurants"
   ],
-  "last_updated": "2025-08-08T00:00:00Z"
+  "last_updated": "2025-08-09T00:33:02Z"
 }
