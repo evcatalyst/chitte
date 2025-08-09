@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Install dependencies
-        run: pip install unittest
+  # unittest is part of the Python standard library; no install needed
       - name: Run events.json tests
         run: python test_events.py
