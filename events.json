@@ -1,0 +1,127 @@
+{
+  "events": [
+    {
+      "name": "Saratoga Folk Fest: A 'New Chitte' Harmony",
+      "date": "2023-10-15",
+      "location": "Saratoga Springs, Saratoga Performing Arts Center",
+      "description": "Outdoor folk music celebration with local bands, perfect for autumn evenings under the stars.",
+      "type": "music and festivals",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 25,
+      "source": "Albany.com events calendar"
+    },
+    {
+      "name": "Albany Art Walk: Brush with the 'New Chitte'",
+      "date": "2023-10-10",
+      "location": "Albany, Washington Park",
+      "description": "Interactive art installations and live painting sessions in a scenic outdoor setting.",
+      "type": "art",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 18,
+      "source": "Times Union weekly picks"
+    },
+    {
+      "name": "Troy Theatre Nights",
+      "date": "2023-10-20",
+      "location": "Troy, Troy Savings Bank Music Hall",
+      "description": "Classic plays with a modern punny twist, indoors to beat the chill.",
+      "type": "theatre",
+      "isOutdoor": false,
+      "isFree": false,
+      "popularity": 15,
+      "source": "All theatres in the capital region"
+    },
+    {
+      "name": "Schenectady Music Jam: 'New Chitte' Beats",
+      "date": "2023-10-05",
+      "location": "Schenectady, Central Park",
+      "description": "Live jazz and blues outdoors, with food trucks for a festive vibe.",
+      "type": "music and festivals",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 22,
+      "source": "Eventbrite for Capital District"
+    },
+    {
+      "name": "Empire State Plaza Harvest Fest",
+      "date": "2023-10-25",
+      "location": "Albany, Empire State Plaza",
+      "description": "Outdoor festival with music, art vendors, and seasonal treats \u2013 a punny play on fall flavors.",
+      "type": "music and festivals",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 30,
+      "source": "Empire State Plaza site"
+    },
+    {
+      "name": "Albany Institute Art Exhibit: 'New Chitte' Visions",
+      "date": "2023-10-12",
+      "location": "Albany, Albany Institute of History & Art",
+      "description": "Indoor showcase of contemporary art pieces with interactive elements.",
+      "type": "art",
+      "isOutdoor": false,
+      "isFree": false,
+      "popularity": 14,
+      "source": "Albany Institute of History & Art"
+    },
+    {
+      "name": "Outdoor Symphony in the Park: 'New Chitte' Notes",
+      "date": "2023-10-18",
+      "location": "Saratoga, Saratoga Spa State Park",
+      "description": "Free orchestral performance amidst nature, with punny musical surprises.",
+      "type": "music and outdoor activities",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 28,
+      "source": "The Daily Gazette"
+    },
+    {
+      "name": "Troy New Bites Opening",
+      "date": "2023-10-08",
+      "location": "Troy, Downtown Troy",
+      "description": "Grand opening of a fresh farm-to-table restaurant, blending local flavors with a punny menu twist.",
+      "type": "new restaurants",
+      "isOutdoor": false,
+      "isFree": false,
+      "popularity": 12,
+      "source": "News about new restaurants"
+    },
+    {
+      "name": "Capital District Theatre Revue",
+      "date": "2023-10-28",
+      "location": "Schenectady, Proctors Theatre",
+      "description": "Indoor theatre series featuring acclaimed productions with clever, pun-filled scripts.",
+      "type": "theatre",
+      "isOutdoor": false,
+      "isFree": false,
+      "popularity": 16,
+      "source": "All theatres in the capital region"
+    },
+    {
+      "name": "Albany Riverside Festival",
+      "date": "2023-10-30",
+      "location": "Albany, Hudson River Waterfront",
+      "description": "Outdoor event with music, art, and riverside activities \u2013 a 'New Chitte' splash of fun.",
+      "type": "music and festivals and outdoor activities",
+      "isOutdoor": true,
+      "isFree": true,
+      "popularity": 20,
+      "source": "Two Buttons Deep"
+    }
+  ],
+  "sources": [
+    "Albany.com events calendar",
+    "Times Union weekly picks",
+    "Eventbrite for Capital District",
+    "Empire State Plaza site",
+    "Albany Institute of History & Art",
+    "All theatres in the capital region",
+    "Barpeople.com",
+    "Two Buttons Deep",
+    "The Daily Gazette",
+    "News about new restaurants"
+  ],
+  "last_updated": "2025-08-09T01:13:40Z"
+}
