@@ -15,7 +15,7 @@ def load_config():
     print(f"Loading config from {CONFIG_PATH}...")
     with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
-    print(f"Config loaded.")
+    print("Config loaded.")
     return config
 
 
@@ -25,7 +25,6 @@ def build_prompt(config):
     sources = ", ".join(config.get("sources", []))
     predilections = "; ".join(config.get("user_predilections", []))
 
-    # Tight, verifiability-focused instructions
     prompt = (
         f"Aggregate upcoming events for {region} from these sources (use the exact URLs): {sources}. "
         f"Timeframe: {timeframe}. "
@@ -34,7 +33,7 @@ def build_prompt(config):
         f"Branding: {config.get('branding', '')} "
         "Rules: Only include events that you can verify on public web pages; each event must include a valid http(s) URL in the 'link' field. "
         "Include exact source URLs (http or https) in the 'sources' array. "
-        "Return strictly a JSON object with 'events' (array) and 'sources' (array) following the provided schema; no extra commentary."
+        "Return strictly a JSON object with 'events' (array) and 'sources' (array); no extra commentary."
     )
     print("Prompt built.")
     return prompt
@@ -63,51 +62,21 @@ def call_grok_api(prompt, config):
         payload["max_tokens"] = config["max_tokens"]
 
     print(f"Calling API model={model} ...")
+    resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
+    print(f"API response status: {resp.status_code}")
+    resp.raise_for_status()
+    data = resp.json()
+    content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+    if not content:
+        raise ValueError("Empty content from API.")
+
     try:
-        resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
-        print(f"API response status: {resp.status_code}")
-        resp.raise_for_status()
-        data = resp.json()
-        content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
-        if not content:
-            raise ValueError("Empty content from API.")
-
-        try:
-            result = json.loads(content)
-        except Exception:
-            match = re.search(r'({.*})', content, re.DOTALL)
-            if match:
-                result = json.loads(match.group(1))
-            else:
-                raise ValueError("No valid JSON found in API response content.")
-
-        return result
-    except Exception as e:
-        print(f"Error calling API with model {model}: {e}")
-        # Optional fallback to a larger model if configured differently
-        if model != "grok-3":
-            try:
-                print("Retrying with model grok-3 ...")
-                payload["model"] = "grok-3"
-                resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
-                print(f"API response status: {resp.status_code}")
-                resp.raise_for_status()
-                data = resp.json()
-                content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
-                if not content:
-                    raise ValueError("Empty content from API (fallback).")
-                try:
-                    result = json.loads(content)
-                except Exception:
-                    match = re.search(r'({.*})', content, re.DOTALL)
-                    if match:
-                        result = json.loads(match.group(1))
-                    else:
-                        raise ValueError("No valid JSON found in API response content (fallback).")
-                return result
-            except Exception as e2:
-                print(f"Fallback call failed: {e2}")
-        raise
+        return json.loads(content)
+    except Exception:
+        match = re.search(r'({.*})', content, re.DOTALL)
+        if match:
+            return json.loads(match.group(1))
+        raise ValueError("No valid JSON found in API response content.")
 
 
 def is_http_url(url):
@@ -121,34 +90,49 @@ def parse_date(date_str):
     if not isinstance(date_str, str):
         return None
     s = date_str.strip()
-    # Try common formats
+
+    # ISO formats with optional Z or timezone offsets
+    try:
+        iso = s.replace("Z", "+00:00") if s.endswith("Z") else s
+        return datetime.fromisoformat(iso).date()
+    except Exception:
+        pass
+
+    # Remove weekday prefix like "Thu, "
+    if "," in s and len(s.split(",", 1)[0].strip()) <= 10:
+        s_wo_wd = s.split(",", 1)[1].strip()
+    else:
+        s_wo_wd = s
+
     fmts = [
         "%Y-%m-%d",
-        "%Y-%m-%dT%H:%M:%SZ",
         "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
         "%m/%d/%Y",
-        "%b %d, %Y",    # Jan 02, 2025
-        "%B %d, %Y",    # January 02, 2025
+        "%b %d, %Y",     # Jan 02, 2025
+        "%B %d, %Y",     # January 02, 2025
+        "%a, %b %d, %Y", # Thu, Aug 15, 2025
+        "%a, %B %d, %Y"  # Thu, August 15, 2025
     ]
-    for fmt in fmts:
-        try:
-            dt = datetime.strptime(s, fmt)
-            return dt.date()
-        except Exception:
-            pass
-    # Last resort: just YYYY-MM-DD from start if present
-    m = re.match(r"^\s*(\d{4}-\d{2}-\d{2})", s)
+    for candidate in (s, s_wo_wd):
+        for fmt in fmts:
+            try:
+                return datetime.strptime(candidate, fmt).date()
+            except Exception:
+                continue
+
+    # Fallback: extract YYYY-MM-DD anywhere
+    m = re.search(r"(\d{4}-\d{2}-\d{2})", s)
     if m:
         try:
             return datetime.strptime(m.group(1), "%Y-%m-%d").date()
         except Exception:
-            pass
+            return None
     return None
 
 
 def get_horizon_days(config):
     tf = config.get("timeframe", "")
-    # Extract an integer number of days if present, default to 60
     nums = re.findall(r"(\d+)", str(tf))
     if nums:
         try:
@@ -159,7 +143,6 @@ def get_horizon_days(config):
 
 
 def coerce_venue_info(obj):
-    # Ensure venue_info object with required keys; accept empty strings if not provided
     default = {
         "yelp_url": "",
         "maps_url": "",
@@ -185,12 +168,12 @@ def validate_and_normalize(raw, horizon_days):
     events_in = raw.get("events", []) if isinstance(raw, dict) else []
     sources_in = raw.get("sources", []) if isinstance(raw, dict) else []
 
-    # Normalize sources: allow strings or {title,url}
+    # Normalize sources
     sources_out = []
     for s in sources_in:
         if isinstance(s, str):
             title = s.strip()
-            url = title  # if string is a URL, keep; otherwise drop later
+            url = title
             if is_http_url(url):
                 sources_out.append({"title": title, "url": url})
         elif isinstance(s, dict):
@@ -198,15 +181,13 @@ def validate_and_normalize(raw, horizon_days):
             url = str(s.get("url", "")).strip()
             if title and is_http_url(url):
                 sources_out.append({"title": title, "url": url})
-        # Drop anything without a valid http(s) url
 
     events_out = []
     for e in events_in:
         if not isinstance(e, dict):
             continue
 
-        date_str = e.get("date")
-        d = parse_date(date_str)
+        d = parse_date(e.get("date"))
         if not d:
             continue
         if d < today or d > max_day:
@@ -216,14 +197,10 @@ def validate_and_normalize(raw, horizon_days):
         desc = str(e.get("description", "")).strip()
         category = str(e.get("category", "")).strip()
         link = e.get("link", "")
-        # time may be optional; normalize to "TBD" if missing/empty
         t = str(e.get("time", "")).strip() or "TBD"
 
         if not (venue and desc and category and is_http_url(link)):
             continue
-
-        is_new = bool(e.get("is_new", False))
-        venue_info = coerce_venue_info(e.get("venue_info", {}))
 
         events_out.append({
             "date": d.isoformat(),
@@ -231,15 +208,12 @@ def validate_and_normalize(raw, horizon_days):
             "venue": venue,
             "description": desc,
             "category": category,
-            "is_new": is_new,
+            "is_new": bool(e.get("is_new", False)),
             "link": link.strip(),
-            "venue_info": venue_info
+            "venue_info": coerce_venue_info(e.get("venue_info", {}))
         })
 
-    return {
-        "events": events_out,
-        "sources": sources_out
-    }
+    return {"events": events_out, "sources": sources_out}
 
 
 def save_events(validated):
@@ -262,10 +236,17 @@ def main():
         validated = validate_and_normalize(raw, horizon)
         if len(validated["events"]) == 0:
             print("No valid events after validation. Not updating events.json.")
-            sys.exit(1)
+            if os.getenv("DEBUG_EVENTS", ""):
+                with open("last_run_raw.json", "w") as f:
+                    json.dump(raw, f, indent=2)
+                with open("last_run_validated.json", "w") as f:
+                    json.dump(validated, f, indent=2)
+                print("Wrote last_run_raw.json and last_run_validated.json for debugging.")
+            soft = bool(config.get("soft_fail_on_empty", True))
+            sys.exit(0 if soft else 1)
         save_events(validated)
         print("Done.")
-    except SystemExit as se:
+    except SystemExit:
         raise
     except Exception as e:
         print(f"Fatal error: {e}")
