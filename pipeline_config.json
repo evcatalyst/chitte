@@ -1,0 +1,7 @@
+[
+  {"name": "aggregate_events", "model": "grok-3"},
+  {"name": "cleanse_data", "model": "grok-3-mini"},
+  {"name": "refine_narration", "model": "grok-3-mini"},
+  {"name": "verify_links", "model": "grok-1.5"},
+  {"name": "enrich_metadata", "model": "grok-1.5"}
+]

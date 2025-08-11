@@ -31,8 +31,6 @@ def build_prompt(config):
         f"Instructions: {config.get('instructions', '')} "
         f"User predilections: {predilections}. "
         f"Branding: {config.get('branding', '')} "
-        "Rules: Only include events that you can verify on public web pages; each event must include a valid http(s) URL in the 'link' field. "
-        "Include exact source URLs (http or https) in the 'sources' array. "
         "Return strictly a JSON object with 'events' (array) and 'sources' (array); no extra commentary."
     )
     print("Prompt built.")
@@ -47,7 +45,7 @@ def call_grok_api(prompt, config):
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
     }
-    model = config.get("model", "grok-3-mini")
+    model = "grok-3"
     payload = {
         "model": model,
         "messages": [
@@ -61,9 +59,16 @@ def call_grok_api(prompt, config):
     if "max_tokens" in config:
         payload["max_tokens"] = config["max_tokens"]
 
+    if os.getenv("DEBUG_EVENTS", ""):
+        print("[DEBUG] Prompt:", prompt)
+        print("[DEBUG] API payload:", json.dumps(payload, indent=2))
     print(f"Calling API model={model} ...")
     resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
-    print(f"API response status: {resp.status_code}")
+    if os.getenv("DEBUG_EVENTS", ""):
+        print("[DEBUG] API response status:", resp.status_code)
+        print("[DEBUG] API response text:", resp.text)
+    else:
+        print(f"API response status: {resp.status_code}")
     resp.raise_for_status()
     data = resp.json()
     content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
@@ -168,19 +173,44 @@ def validate_and_normalize(raw, horizon_days):
     events_in = raw.get("events", []) if isinstance(raw, dict) else []
     sources_in = raw.get("sources", []) if isinstance(raw, dict) else []
 
-    # Normalize sources
+    # Normalize sources with readable titles
+    def extract_title_from_url(url):
+        if not is_http_url(url):
+            return url
+        # Extract domain and use as title
+        match = re.search(r'https?://(?:www\.)?([^/]+)', url)
+        if match:
+            domain = match.group(1)
+            # Map known domains to site names
+            domain_map = {
+                "albany.com": "Albany.com",
+                "timesunion.com": "Times Union",
+                "eventbrite.com": "Eventbrite",
+                "empirestateplaza.ny.gov": "Empire State Plaza",
+                "albanyinstitute.org": "Albany Institute of History & Art",
+                "proctors.org": "Proctors Theatre",
+                "theegg.org": "The Egg",
+                "palacealbany.org": "Palace Theatre",
+                "troymusichall.org": "Troy Music Hall",
+                "thecohoesmusichall.org": "Cohoes Music Hall"
+            }
+            return domain_map.get(domain, domain)
+        return url
+
     sources_out = []
     for s in sources_in:
+        url = None
+        title = None
         if isinstance(s, str):
-            title = s.strip()
-            url = title
-            if is_http_url(url):
-                sources_out.append({"title": title, "url": url})
+            url = s.strip()
+            title = extract_title_from_url(url)
         elif isinstance(s, dict):
-            title = str(s.get("title", "")).strip()
             url = str(s.get("url", "")).strip()
-            if title and is_http_url(url):
-                sources_out.append({"title": title, "url": url})
+            title = str(s.get("title", "")).strip() or extract_title_from_url(url)
+        # Explicitly skip if url is missing, empty, or not valid
+        if not url or not isinstance(url, str) or not url.strip() or not is_http_url(url):
+            continue
+        sources_out.append({"title": title, "url": url})
 
     events_out = []
     for e in events_in:

@@ -1,0 +1,27 @@
+name: event-pipeline
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  event-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt || true
+      - name: Run event pipeline
+        run: python3 pipeline.py
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: pipeline-logs
+          path: logs/
+      - name: Run tests
+        run: python3 test_events.py
