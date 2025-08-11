@@ -2,6 +2,7 @@
   "model": "grok-3-mini",
   "temperature": 0.3,
   "max_tokens": 2048,
+  "soft_fail_on_empty": true,
   "sources": [
     "https://www.albany.com/events/",
     "https://www.timesunion.com/events/",
@@ -14,7 +15,7 @@
     "https://www.troymusichall.org/events",
     "https://www.thecohoesmusichall.org/events"
   ],
-  "instructions": "Only include events that can be verified on public web pages. Each event must include a real http(s) URL in the 'link' field pointing to the event page. Include exact source URLs (http/https) in the output 'sources' array. Do not fabricate events or links. Omit any events that cannot be verified.",
+  "instructions": "Only include events that can be verified on public web pages. Each event must include a real http(s) URL in the 'link' field pointing to the event’s dedicated page (not just a calendar landing page). Include exact source URLs (http/https) in the output 'sources' array. Do not fabricate events or links. Omit any events that cannot be verified.",
   "region": "New York's Capital District (Albany, Schenectady, Troy, Saratoga, and surrounding areas)",
   "timeframe": "Upcoming events for the next 60 days, starting from the current date.",
   "user_predilections": [
