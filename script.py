@@ -1,38 +1,49 @@
 import os
+import sys
 import json
+import re
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta, date
 
 CONFIG_PATH = "config_logic.json"
 EVENTS_PATH = "events.json"
 API_URL = "https://api.x.ai/v1/chat/completions"
 API_KEY = os.getenv("GROK_API_KEY")
 
+
 def load_config():
     print(f"Loading config from {CONFIG_PATH}...")
     with open(CONFIG_PATH, "r") as f:
         config = json.load(f)
-    print(f"Config loaded: {json.dumps(config, indent=2)}")
+    print(f"Config loaded.")
     return config
 
+
 def build_prompt(config):
+    region = config.get("region", "New York's Capital District")
+    timeframe = config.get("timeframe", "next 60 days")
     sources = ", ".join(config.get("sources", []))
     predilections = "; ".join(config.get("user_predilections", []))
+
+    # Tight, verifiability-focused instructions
     prompt = (
-        f"Aggregate upcoming events for New York's Capital District (Albany, Schenectady, Troy, Saratoga, and surrounding areas) "
-        f"from these sources: {sources}. "
-        f"Timeframe: next 30 days from today. "
+        f"Aggregate upcoming events for {region} from these sources (use the exact URLs): {sources}. "
+        f"Timeframe: {timeframe}. "
         f"Instructions: {config.get('instructions', '')} "
         f"User predilections: {predilections}. "
         f"Branding: {config.get('branding', '')} "
-        f"You must return at least 10 valid events for the Albany area, each with all required fields (date, time, venue, description, category, is_new, link, venue_info). "
-        f"If there are not enough valid events, fill the gaps using events from Times Union Center / MVP Arena. "
-        f"Output strictly as JSON object with 'events' array and 'sources' array conforming to this schema; no extra text."
+        "Rules: Only include events that you can verify on public web pages; each event must include a valid http(s) URL in the 'link' field. "
+        "Include exact source URLs (http or https) in the 'sources' array. "
+        "Return strictly a JSON object with 'events' (array) and 'sources' (array) following the provided schema; no extra commentary."
     )
-    print(f"Prompt built: {prompt}")
+    print("Prompt built.")
     return prompt
 
+
 def call_grok_api(prompt, config):
+    if not API_KEY:
+        raise RuntimeError("GROK_API_KEY environment variable is not set.")
+
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json"
@@ -44,138 +55,222 @@ def call_grok_api(prompt, config):
             {"role": "system", "content": "You are an expert event aggregator. Return only valid JSON as specified."},
             {"role": "user", "content": prompt}
         ],
-        "temperature": config.get("temperature", 0.7),
+        "temperature": config.get("temperature", 0.3),
         "stream": False,
         "response_format": {"type": "json_object"}
     }
-    print(f"Calling Grok API with payload: {json.dumps(payload, indent=2)}")
+    if "max_tokens" in config:
+        payload["max_tokens"] = config["max_tokens"]
+
+    print(f"Calling API model={model} ...")
     try:
-        resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
+        resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
         print(f"API response status: {resp.status_code}")
         resp.raise_for_status()
         data = resp.json()
-        print(f"Raw API response: {json.dumps(data, indent=2)}")
-        content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-        print(f"API content: {content}")
+        content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+        if not content:
+            raise ValueError("Empty content from API.")
+
         try:
             result = json.loads(content)
         except Exception:
-            import re
             match = re.search(r'({.*})', content, re.DOTALL)
             if match:
                 result = json.loads(match.group(1))
             else:
-                print("No valid JSON found in API response content.")
-                raise ValueError("No valid JSON found in API response.")
-        print(f"Parsed result: {json.dumps(result, indent=2)}")
+                raise ValueError("No valid JSON found in API response content.")
+
         return result
     except Exception as e:
-        print(f"Error calling Grok API: {e}")
+        print(f"Error calling API with model {model}: {e}")
+        # Optional fallback to a larger model if configured differently
         if model != "grok-3":
-            print("Retrying with grok-3...")
-            payload["model"] = "grok-3"
             try:
-                resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-                print(f"API response status (grok-3): {resp.status_code}")
+                print("Retrying with model grok-3 ...")
+                payload["model"] = "grok-3"
+                resp = requests.post(API_URL, headers=headers, json=payload, timeout=90)
+                print(f"API response status: {resp.status_code}")
                 resp.raise_for_status()
                 data = resp.json()
-                print(f"Raw API response (grok-3): {json.dumps(data, indent=2)}")
-                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
-                print(f"API content (grok-3): {content}")
+                content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+                if not content:
+                    raise ValueError("Empty content from API (fallback).")
                 try:
                     result = json.loads(content)
                 except Exception:
-                    import re
                     match = re.search(r'({.*})', content, re.DOTALL)
                     if match:
                         result = json.loads(match.group(1))
                     else:
-                        print("No valid JSON found in API response content (grok-3).")
-                        raise ValueError("No valid JSON found in API response.")
-                print(f"Parsed result (grok-3): {json.dumps(result, indent=2)}")
+                        raise ValueError("No valid JSON found in API response content (fallback).")
                 return result
             except Exception as e2:
-                print(f"Error calling Grok API with grok-3: {e2}")
+                print(f"Fallback call failed: {e2}")
+        raise
+
+
+def is_http_url(url):
+    if not isinstance(url, str):
+        return False
+    u = url.strip()
+    return u.startswith("http://") or u.startswith("https://")
+
+
+def parse_date(date_str):
+    if not isinstance(date_str, str):
         return None
+    s = date_str.strip()
+    # Try common formats
+    fmts = [
+        "%Y-%m-%d",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%dT%H:%M:%S",
+        "%m/%d/%Y",
+        "%b %d, %Y",    # Jan 02, 2025
+        "%B %d, %Y",    # January 02, 2025
+    ]
+    for fmt in fmts:
+        try:
+            dt = datetime.strptime(s, fmt)
+            return dt.date()
+        except Exception:
+            pass
+    # Last resort: just YYYY-MM-DD from start if present
+    m = re.match(r"^\s*(\d{4}-\d{2}-\d{2})", s)
+    if m:
+        try:
+            return datetime.strptime(m.group(1), "%Y-%m-%d").date()
+        except Exception:
+            pass
+    return None
 
-def save_events(data):
-    print(f"Saving events to {EVENTS_PATH}...")
-    # Enforce full event schema for each event
-    def default_venue_info():
-        return {
-            "yelp_url": "",
-            "maps_url": "",
-            "photo_url": "",
-            "description": ""
-        }
 
-    # Fix sources: ensure each is an object with title and url
-    fixed_sources = []
-    for src in data.get("sources", []):
-        if isinstance(src, dict) and "title" in src and "url" in src:
-            fixed_sources.append(src)
-        elif isinstance(src, dict) and "name" in src and "url" in src:
-            fixed_sources.append({"title": src["name"], "url": src["url"]})
-        elif isinstance(src, str):
-            fixed_sources.append({"title": src, "url": ""})
-    data["sources"] = fixed_sources
+def get_horizon_days(config):
+    tf = config.get("timeframe", "")
+    # Extract an integer number of days if present, default to 60
+    nums = re.findall(r"(\d+)", str(tf))
+    if nums:
+        try:
+            return int(nums[-1])
+        except Exception:
+            pass
+    return 60
 
-    # Fix events: ensure all required fields, non-blank time, and pad to 10 events
-    events = data.get("events", [])
-    for event in events:
-        event.setdefault("date", "")
-        event.setdefault("time", "TBD")
-        event.setdefault("venue", event.get("location", ""))
-        event.setdefault("description", "")
-        event.setdefault("category", "misc")
-        event.setdefault("is_new", False)
-        event.setdefault("link", "")
-        # Ensure venue_info is a dict with all required fields
-        vi = event.get("venue_info", {})
-        if not isinstance(vi, dict):
-            vi = {"yelp_url": "", "maps_url": "", "photo_url": "", "description": str(vi)}
-        for k in ["yelp_url", "maps_url", "photo_url", "description"]:
-            vi.setdefault(k, "")
-        event["venue_info"] = vi
-        # If time is blank, set to 'TBD'
-        if not event["time"]:
-            event["time"] = "TBD"
-        # If category is blank, set to 'misc'
-        if not event["category"]:
-            event["category"] = "misc"
 
-    # Pad events to at least 10
-    while len(events) < 10:
-        events.append({
-            "date": "TBD",
-            "time": "TBD",
-            "venue": "TBD",
-            "description": "Placeholder event to meet minimum count.",
-            "category": "misc",
-            "is_new": False,
-            "link": "",
-            "venue_info": default_venue_info()
+def coerce_venue_info(obj):
+    # Ensure venue_info object with required keys; accept empty strings if not provided
+    default = {
+        "yelp_url": "",
+        "maps_url": "",
+        "photo_url": "",
+        "description": ""
+    }
+    if not isinstance(obj, dict):
+        return default
+    out = {}
+    for k in default:
+        v = obj.get(k, "")
+        if k.endswith("_url"):
+            out[k] = v if is_http_url(v) else ""
+        else:
+            out[k] = v if isinstance(v, str) else ""
+    return out
+
+
+def validate_and_normalize(raw, horizon_days):
+    today = date.today()
+    max_day = today + timedelta(days=horizon_days)
+
+    events_in = raw.get("events", []) if isinstance(raw, dict) else []
+    sources_in = raw.get("sources", []) if isinstance(raw, dict) else []
+
+    # Normalize sources: allow strings or {title,url}
+    sources_out = []
+    for s in sources_in:
+        if isinstance(s, str):
+            title = s.strip()
+            url = title  # if string is a URL, keep; otherwise drop later
+            if is_http_url(url):
+                sources_out.append({"title": title, "url": url})
+        elif isinstance(s, dict):
+            title = str(s.get("title", "")).strip()
+            url = str(s.get("url", "")).strip()
+            if title and is_http_url(url):
+                sources_out.append({"title": title, "url": url})
+        # Drop anything without a valid http(s) url
+
+    events_out = []
+    for e in events_in:
+        if not isinstance(e, dict):
+            continue
+
+        date_str = e.get("date")
+        d = parse_date(date_str)
+        if not d:
+            continue
+        if d < today or d > max_day:
+            continue
+
+        venue = str(e.get("venue", "")).strip()
+        desc = str(e.get("description", "")).strip()
+        category = str(e.get("category", "")).strip()
+        link = e.get("link", "")
+        # time may be optional; normalize to "TBD" if missing/empty
+        t = str(e.get("time", "")).strip() or "TBD"
+
+        if not (venue and desc and category and is_http_url(link)):
+            continue
+
+        is_new = bool(e.get("is_new", False))
+        venue_info = coerce_venue_info(e.get("venue_info", {}))
+
+        events_out.append({
+            "date": d.isoformat(),
+            "time": t,
+            "venue": venue,
+            "description": desc,
+            "category": category,
+            "is_new": is_new,
+            "link": link.strip(),
+            "venue_info": venue_info
         })
-    data["events"] = events
 
-    data["last_updated"] = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {
+        "events": events_out,
+        "sources": sources_out
+    }
+
+
+def save_events(validated):
+    payload = {
+        "last_updated": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+        "events": validated["events"],
+        "sources": validated["sources"]
+    }
     with open(EVENTS_PATH, "w") as f:
-        json.dump(data, f, indent=2)
-    print(f"Events saved: {json.dumps(data, indent=2)}")
+        json.dump(payload, f, indent=2)
+    print(f"Wrote {len(validated['events'])} events to {EVENTS_PATH}.")
+
 
 def main():
-    if not API_KEY:
-        print("Missing GROK_API_KEY environment variable.")
-        return
-    config = load_config()
-    prompt = build_prompt(config)
-    data = call_grok_api(prompt, config)
-    if data and "events" in data and "sources" in data:
-        print(f"Events found: {len(data['events'])}, Sources found: {len(data['sources'])}")
-        save_events(data)
-        print("Events updated successfully.")
-    else:
-        print("Failed to update events. Check API response and config.")
+    try:
+        config = load_config()
+        prompt = build_prompt(config)
+        raw = call_grok_api(prompt, config)
+        horizon = get_horizon_days(config)
+        validated = validate_and_normalize(raw, horizon)
+        if len(validated["events"]) == 0:
+            print("No valid events after validation. Not updating events.json.")
+            sys.exit(1)
+        save_events(validated)
+        print("Done.")
+    except SystemExit as se:
+        raise
+    except Exception as e:
+        print(f"Fatal error: {e}")
+        sys.exit(2)
+
 
 if __name__ == "__main__":
     main()
