@@ -1,5 +1,5 @@
 {
-  "model": "grok-3-mini",
+  "model": "grok-3",
   "temperature": 0.3,
   "max_tokens": 2048,
   "soft_fail_on_empty": true,
