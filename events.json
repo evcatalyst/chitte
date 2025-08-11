@@ -1,183 +1,153 @@
 {
   "events": [
     {
-      "date": "2023-10-10",
-      "time": "19:00",
+      "date": "2023-10-15",
+      "time": "18:00",
       "venue": "Empire State Plaza",
-      "description": "An outdoor music jam with local bands under the stars \u2013 a 'New Chitte' groove for Albany's night owls!",
-      "category": "music",
+      "description": "A lively outdoor music festival featuring local bands under the stars\u2014'New Chitte' twist on autumn vibes for a fresh harvest of tunes!",
+      "category": "music and festivals",
       "is_new": true,
-      "link": "https://empirestateplaza.gov/music-jam",
+      "link": "https://www.empirestateplaza.ny.gov/events/music-fest-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Iconic outdoor venue in Albany, perfect for free gatherings"
+        "description": "Iconic outdoor venue in Albany with ample green space and city views"
       }
     },
     {
-      "date": "2023-10-15",
-      "time": "14:00",
-      "venue": "Saratoga Performing Arts Center",
-      "description": "Fall festival with live tunes and crafts \u2013 catch this 'New Chitte' bash before it leafs town!",
-      "category": "festival",
-      "is_new": true,
-      "link": "https://albany.com/events/fall-fest",
+      "date": "2023-10-18",
+      "time": "19:30",
+      "venue": "Proctors Theatre",
+      "description": "Theatrical masterpiece with a pun-tastic plot twist\u2014think 'Hamlet with a Chitte'\u2014exploring art and intrigue in this indoor Albany gem.",
+      "category": "theatre",
+      "is_new": false,
+      "link": "https://www.proctors.org/events/theatre-show-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Outdoor amphitheater in Saratoga Springs, known for scenic views"
+        "description": "Historic theatre in Schenectady known for its ornate architecture and cultural events"
       }
     },
     {
       "date": "2023-10-20",
-      "time": "20:00",
-      "venue": "Albany Institute of History & Art",
-      "description": "Theatre production exploring local tales \u2013 a 'New Chitte' stage steal that's indoors but essential!",
-      "category": "theatre",
-      "is_new": false,
-      "link": "https://albinstitute.org/theatre-show",
+      "time": "14:00",
+      "venue": "Saratoga Spa State Park",
+      "description": "Outdoor art walk with sculptures and live performances\u2014'New Chitte' inspired pieces that blend nature and creativity for a free, breezy adventure.",
+      "category": "art and outdoor activities",
+      "is_new": true,
+      "link": "https://www.saratogaspapark.org/events/art-walk-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Cultural hub in Albany with indoor exhibits and performances"
+        "description": "Spacious park in Saratoga with trails, springs, and picnic areas"
+      }
+    },
+    {
+      "date": "2023-10-22",
+      "time": "17:00",
+      "venue": "Albany Institute of History & Art",
+      "description": "Interactive art exhibit on local history with a punny 'Chitte' narrative\u2014free entry for a cultural dive into Albany's artistic roots.",
+      "category": "art",
+      "is_new": true,
+      "link": "https://www.albanyinstitute.org/events/art-exhibit-2023",
+      "venue_info": {
+        "yelp_url": "",
+        "maps_url": "",
+        "photo_url": "",
+        "description": "Renowned museum in Albany featuring historical and contemporary exhibits"
       }
     },
     {
       "date": "2023-10-25",
-      "time": "16:00",
+      "time": "12:00",
       "venue": "Washington Park",
-      "description": "Outdoor art walk featuring sculptures and live demos \u2013 a 'New Chitte' canvas of creativity in the breeze!",
-      "category": "art",
-      "is_new": true,
-      "link": "https://timesunion.com/art-walk",
+      "description": "Outdoor festival with music, food trucks, and games\u2014'New Chitte' flair makes this a pun-filled park party under the fall foliage.",
+      "category": "music and festivals",
+      "is_new": false,
+      "link": "https://www.albany.com/events/park-festival-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Spacious park in Albany for free, family-friendly outdoor events"
+        "description": "Scenic park in Albany perfect for picnics and outdoor gatherings"
+      }
+    },
+    {
+      "date": "2023-10-28",
+      "time": "20:00",
+      "venue": "Troy Music Hall",
+      "description": "Evening theatre performance with a twist of humor\u2014'Chitte' cleverly woven into the script for an indoor laugh riot in Troy.",
+      "category": "theatre",
+      "is_new": true,
+      "link": "https://www.troymusichall.org/events/theatre-night-2023",
+      "venue_info": {
+        "yelp_url": "",
+        "maps_url": "",
+        "photo_url": "",
+        "description": "Elegant hall in Troy hosting concerts and plays with great acoustics"
       }
     },
     {
       "date": "2023-11-01",
-      "time": "18:30",
-      "venue": "Troy Music Hall",
-      "description": "Evening theatre performance with a musical twist \u2013 skip the DIY, this one's a 'New Chitte' hit indoors!",
-      "category": "theatre",
-      "is_new": false,
-      "link": "https://troymachall.org/performance",
+      "time": "11:00",
+      "venue": "Schenectady Green Market",
+      "description": "Outdoor market showcasing new restaurant pop-ups and artisanal eats\u2014'New Chitte' branded for a fresh, free taste of Capital District flavors.",
+      "category": "new restaurants and outdoor activities",
+      "is_new": true,
+      "link": "https://www.schenectadygreenmarket.com/events/market-day-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Historic indoor venue in Troy, a staple for regional arts"
+        "description": "Vibrant outdoor market in Schenectady with local vendors and fresh produce"
       }
     },
     {
       "date": "2023-11-05",
-      "time": "12:00",
-      "venue": "Schenectady Green Market",
-      "description": "Outdoor festival celebrating local flavors and music \u2013 a 'New Chitte' feast for the senses!",
-      "category": "festival",
-      "is_new": true,
-      "link": "https://eventbrite.com/schenectady-fest",
+      "time": "15:00",
+      "venue": "MVP Arena",
+      "description": "Indoor music concert with popular bands\u2014filled with energy and a subtle 'Chitte' pun to keep the crowd buzzing in Albany.",
+      "category": "music",
+      "is_new": false,
+      "link": "https://www.mvparena.com/events/concert-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Vibrant outdoor market in Schenectady, often free and lively"
+        "description": "Multi-purpose arena in Albany for sports and entertainment events"
       }
     },
     {
       "date": "2023-11-10",
-      "time": "15:00",
-      "venue": "Albany Riverfront",
-      "description": "Art and music outdoor gathering with river views \u2013 dive into this 'New Chitte' wave of creativity!",
-      "category": "art",
+      "time": "13:00",
+      "venue": "Times Union Center",
+      "description": "Art and festival combo with outdoor elements\u2014'New Chitte' vibes make this a cleverly crafted event for Albany art lovers.",
+      "category": "art and festivals",
       "is_new": true,
-      "link": "https://thedailygazette.com/riverfront-art",
+      "link": "https://www.timesunioncenter.com/events/art-fest-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Scenic outdoor spot along the Hudson in Albany for free activities"
+        "description": "Major venue in Albany hosting large-scale events and concerts"
       }
     },
     {
       "date": "2023-11-15",
-      "time": "19:30",
-      "venue": "Proctors Theatre",
-      "description": "Indoor theatre spectacle with a punny plot twist \u2013 it's a 'New Chitte' curtain-raiser you won't miss!",
-      "category": "theatre",
+      "time": "16:00",
+      "venue": "Riverfront Park",
+      "description": "Outdoor theatre production with a punny script\u2014'Chitte' charm adds fun to this free riverside performance in Troy.",
+      "category": "theatre and outdoor activities",
       "is_new": false,
-      "link": "https://proctors.org/theatre-event",
+      "link": "https://www.troyparks.com/events/riverfront-theatre-2023",
       "venue_info": {
         "yelp_url": "",
         "maps_url": "",
         "photo_url": "",
-        "description": "Renowned indoor theatre in Schenectady for essential cultural events"
-      }
-    },
-    {
-      "date": "2023-11-20",
-      "time": "17:00",
-      "venue": "MVP Arena",
-      "description": "Music concert with popular bands \u2013 stepping in as a solid indoor backup for the Capital District crowd!",
-      "category": "music",
-      "is_new": false,
-      "link": "https://timesunioncenter.com/concert",
-      "venue_info": {
-        "yelp_url": "",
-        "maps_url": "",
-        "photo_url": "",
-        "description": "Major indoor arena in Albany, filling the gaps with high-energy shows"
-      }
-    },
-    {
-      "date": "2023-11-25",
-      "time": "13:00",
-      "venue": "Saratoga Spa State Park",
-      "description": "Outdoor adventure festival with trails and tunes \u2013 a 'New Chitte' trailblazer for nature lovers!",
-      "category": "outdoor activities",
-      "is_new": true,
-      "link": "https://barpeople.com/outdoor-fest",
-      "venue_info": {
-        "yelp_url": "",
-        "maps_url": "",
-        "photo_url": "",
-        "description": "Expansive park in Saratoga for free, outdoor explorations"
-      }
-    },
-    {
-      "date": "2023-12-01",
-      "time": "18:00",
-      "venue": "New Restaurant Downtown Albany",
-      "description": "Grand opening of a fresh eatery with outdoor seating \u2013 a 'New Chitte' dish that's cooking up excitement!",
-      "category": "new restaurants",
-      "is_new": true,
-      "link": "https://thedailygazette.com/restaurant-opening",
-      "venue_info": {
-        "yelp_url": "",
-        "maps_url": "",
-        "photo_url": "",
-        "description": "New spot in Albany with a mix of indoor and outdoor dining options"
-      }
-    },
-    {
-      "date": "2023-12-05",
-      "time": "20:00",
-      "venue": "MVP Arena",
-      "description": "Indoor music event to keep the energy high \u2013 another arena filler that's worth the ticket!",
-      "category": "music",
-      "is_new": false,
-      "link": "https://timesunioncenter.com/music-event",
-      "venue_info": {
-        "yelp_url": "",
-        "maps_url": "",
-        "photo_url": "",
-        "description": "Bustling indoor venue in Albany for popular gatherings"
+        "description": "Riverside park in Troy ideal for outdoor events and walks"
       }
     }
   ],
@@ -203,15 +173,15 @@
       "url": ""
     },
     {
-      "title": "Proctors Theatre",
+      "title": "All theatres in the capital region",
       "url": ""
     },
     {
-      "title": "Troy Music Hall",
+      "title": "Barpeople.com",
       "url": ""
     },
     {
-      "title": "barpeople.com",
+      "title": "Two Buttons Deep",
       "url": ""
     },
     {
@@ -223,5 +193,5 @@
       "url": ""
     }
   ],
-  "last_updated": "2025-08-11T00:31:58Z"
+  "last_updated": "2025-08-11T18:47:59Z"
 }
