@@ -122,7 +122,7 @@ def parse_date(date_str):
                 continue
 
     # Fallback: extract YYYY-MM-DD anywhere
-    m = re.search(r"(\d{4}-\d{2}-\d{2})", s)
+        model = "grok-3"
     if m:
         try:
             return datetime.strptime(m.group(1), "%Y-%m-%d").date()
