@@ -1,0 +1,38 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "15 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (CodeQL)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript', 'python' ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+      - name: Install deps (Python example)
+        if: matrix.language == 'python'
+        run: |
+          pip install requests || true
+      - name: Install deps (JS example)
+        if: matrix.language == 'javascript'
+        run: |
+          if [ -f package.json ]; then npm ci; fi
+      - uses: github/codeql-action/analyze@v3

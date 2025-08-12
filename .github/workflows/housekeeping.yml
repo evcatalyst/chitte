@@ -1,0 +1,33 @@
+name: Housekeeping
+
+on:
+  schedule:
+    - cron: "30 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          days-before-stale: 45
+          days-before-close: 14
+          stale-issue-message: "This issue has gone quiet. Comment to keep it open."
+          stale-pr-message: "This PR has gone quiet. Comment to keep it open."
+          exempt-issue-labels: "pinned,security"
+          remove-stale-when-updated: true
+          close-issue-message: "Closing due to inactivity."
+          close-pr-message: "Closing due to inactivity."
+
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync labels (placeholder)
+        run: echo "Implement label sync script if desired."
