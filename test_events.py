@@ -41,5 +41,9 @@ class TestEventsJson(unittest.TestCase):
         # Minimum event count requirement removed; allow any number of valid events
         pass
 
+    def test_last_updated_present(self):
+        self.assertIn('last_updated', self.data)
+        self.assertTrue(self.data['last_updated'])
+
 if __name__ == "__main__":
     unittest.main()

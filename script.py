@@ -19,6 +19,24 @@ def load_config():
     return config
 
 
+def load_previous_events():
+    """Load previous events.json if exists to determine is_new status."""
+    try:
+        with open(EVENTS_PATH, "r") as f:
+            data = json.load(f)
+        events = data.get("events", [])
+        # Create a set of event tuples for fast lookup
+        previous_events = set()
+        for event in events:
+            key = (event.get("date"), event.get("venue"), event.get("description"))
+            previous_events.add(key)
+        print(f"Loaded {len(events)} previous events for comparison.")
+        return previous_events, events
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("No previous events.json found or invalid JSON.")
+        return set(), []
+
+
 def build_prompt(config):
     region = config.get("region", "New York's Capital District")
     timeframe = config.get("timeframe", "next 60 days")
@@ -127,7 +145,7 @@ def parse_date(date_str):
                 continue
 
     # Fallback: extract YYYY-MM-DD anywhere
-        model = "grok-3"
+    m = re.search(r'(\d{4}-\d{2}-\d{2})', s)
     if m:
         try:
             return datetime.strptime(m.group(1), "%Y-%m-%d").date()
@@ -166,12 +184,21 @@ def coerce_venue_info(obj):
     return out
 
 
-def validate_and_normalize(raw, horizon_days):
+def validate_and_normalize(raw, horizon_days, previous_events=None):
+    if previous_events is None:
+        previous_events = set()
+        
     today = date.today()
     max_day = today + timedelta(days=horizon_days)
 
     events_in = raw.get("events", []) if isinstance(raw, dict) else []
     sources_in = raw.get("sources", []) if isinstance(raw, dict) else []
+    
+    # Counters for logging
+    total_events = len(events_in)
+    skipped_invalid_date = 0
+    skipped_out_of_window = 0
+    skipped_missing_fields = 0
 
     # Normalize sources with readable titles
     def extract_title_from_url(url):
@@ -219,8 +246,10 @@ def validate_and_normalize(raw, horizon_days):
 
         d = parse_date(e.get("date"))
         if not d:
+            skipped_invalid_date += 1
             continue
         if d < today or d > max_day:
+            skipped_out_of_window += 1
             continue
 
         venue = str(e.get("venue", "")).strip()
@@ -230,7 +259,14 @@ def validate_and_normalize(raw, horizon_days):
         t = str(e.get("time", "")).strip() or "TBD"
 
         if not (venue and desc and category and is_http_url(link)):
+            skipped_missing_fields += 1
             continue
+
+        # Determine is_new status
+        event_key = (d.isoformat(), venue, desc)
+        is_new = bool(e.get("is_new", False))
+        if not is_new and event_key not in previous_events:
+            is_new = True
 
         events_out.append({
             "date": d.isoformat(),
@@ -238,10 +274,19 @@ def validate_and_normalize(raw, horizon_days):
             "venue": venue,
             "description": desc,
             "category": category,
-            "is_new": bool(e.get("is_new", False)),
+            "is_new": is_new,
             "link": link.strip(),
             "venue_info": coerce_venue_info(e.get("venue_info", {}))
         })
+
+    # Log validation stats
+    if os.getenv("DEBUG_EVENTS", ""):
+        print(f"[DEBUG] Validation stats: {total_events} total, {len(events_out)} valid, "
+              f"{skipped_invalid_date} skipped (invalid date), "
+              f"{skipped_out_of_window} skipped (out of window), "
+              f"{skipped_missing_fields} skipped (missing fields)")
+    else:
+        print(f"Validation: {total_events} total → {len(events_out)} valid events")
 
     return {"events": events_out, "sources": sources_out}
 
@@ -260,26 +305,37 @@ def save_events(validated):
 def main():
     try:
         config = load_config()
+        previous_events, previous_events_list = load_previous_events()
         prompt = build_prompt(config)
         raw = call_grok_api(prompt, config)
         horizon = get_horizon_days(config)
-        validated = validate_and_normalize(raw, horizon)
+        validated = validate_and_normalize(raw, horizon, previous_events)
+        
+        # Always write debug files when DEBUG_EVENTS is set
+        if os.getenv("DEBUG_EVENTS", ""):
+            with open("last_run_raw.json", "w") as f:
+                json.dump(raw, f, indent=2)
+            with open("last_run_validated.json", "w") as f:
+                json.dump(validated, f, indent=2)
+            print("Wrote last_run_raw.json and last_run_validated.json for debugging.")
+        
         if len(validated["events"]) == 0:
-            print("No valid events after validation. Not updating events.json.")
-            if os.getenv("DEBUG_EVENTS", ""):
-                with open("last_run_raw.json", "w") as f:
-                    json.dump(raw, f, indent=2)
-                with open("last_run_validated.json", "w") as f:
-                    json.dump(validated, f, indent=2)
-                print("Wrote last_run_raw.json and last_run_validated.json for debugging.")
-            soft = bool(config.get("soft_fail_on_empty", True))
-            sys.exit(0 if soft else 1)
-        save_events(validated)
+            print("No valid events after validation.")
+            force_save = os.getenv("FORCE_SAVE_ON_EMPTY", "").lower() in ("1", "true", "yes")
+            if force_save:
+                print("FORCE_SAVE_ON_EMPTY is set, saving empty events.json with updated timestamp.")
+                save_events(validated)
+            else:
+                print("Not updating events.json (use FORCE_SAVE_ON_EMPTY=1 to force save).")
+                soft = bool(config.get("soft_fail_on_empty", True))
+                sys.exit(0 if soft else 1)
+        else:
+            save_events(validated)
         print("Done.")
     except SystemExit:
         raise
     except Exception as e:
-        print(f"Fatal error: {e}")
+        print(f"ERROR: Fatal error: {e}")
         sys.exit(2)
 
 

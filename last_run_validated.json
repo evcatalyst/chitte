@@ -1,45 +1,4 @@
 {
   "events": [],
-  "sources": [
-    {
-      "title": "Albany.com",
-      "url": "https://www.albany.com/events/"
-    },
-    {
-      "title": "Times Union",
-      "url": "https://www.timesunion.com/events/"
-    },
-    {
-      "title": "Eventbrite",
-      "url": "https://www.eventbrite.com/d/ny--albany/events/"
-    },
-    {
-      "title": "Empire State Plaza",
-      "url": "https://empirestateplaza.ny.gov/events"
-    },
-    {
-      "title": "Albany Institute of History & Art",
-      "url": "https://www.albanyinstitute.org/programs-and-events"
-    },
-    {
-      "title": "Proctors Theatre",
-      "url": "https://www.proctors.org/events/"
-    },
-    {
-      "title": "The Egg",
-      "url": "https://www.theegg.org/events"
-    },
-    {
-      "title": "Palace Theatre",
-      "url": "https://www.palacealbany.org/events"
-    },
-    {
-      "title": "Troy Music Hall",
-      "url": "https://www.troymusichall.org/events"
-    },
-    {
-      "title": "Cohoes Music Hall",
-      "url": "https://www.thecohoesmusichall.org/events"
-    }
-  ]
+  "sources": []
 }
