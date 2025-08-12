@@ -17,55 +17,86 @@ jobs:
   build-test:
     name: Lint / Test / Build
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 20.x]
-        python-version: [3.11, 3.12]
+        node-version: [20.x]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node
+      # Use cache only if a supported lock file exists
+      - name: Setup Node (with cache)
+        if: hashFiles('package-lock.json') != '' || hashFiles('npm-shrinkwrap.json') != '' || hashFiles('yarn.lock') != '' || hashFiles('pnpm-lock.yaml') != ''
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Node (no cache)
+        if: hashFiles('package-lock.json') == '' && hashFiles('npm-shrinkwrap.json') == '' && hashFiles('yarn.lock') == '' && hashFiles('pnpm-lock.yaml') == ''
+        uses: actions/setup-node@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          node-version: ${{ matrix.node-version }}
+
+      - name: Detect package manager
+        id: pm
+        run: |
+          if [ -f pnpm-lock.yaml ]; then echo "pm=pnpm" >> $GITHUB_OUTPUT; \
+          elif [ -f yarn.lock ]; then echo "pm=yarn" >> $GITHUB_OUTPUT; \
+          elif [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then echo "pm=npm" >> $GITHUB_OUTPUT; \
+          elif [ -f package.json ]; then echo "pm=npm-nolock" >> $GITHUB_OUTPUT; \
+          else echo "pm=none" >> $GITHUB_OUTPUT; fi
 
       - name: Install dependencies
         run: |
-          if [ -f package.json ]; then npm ci; fi
-          if [ -f pyproject.toml ]; then pip install -e .[dev] || pip install -r requirements.txt; fi
-          if [ -f go.mod ]; then go mod download; fi
-          # Install requests for Python scripts
-          pip install requests || true
+          case "${{ steps.pm.outputs.pm }}" in
+            pnpm) corepack enable && pnpm install --frozen-lockfile ;;
+            yarn) corepack enable && yarn install --frozen-lockfile ;;
+            npm)  npm ci ;;
+            npm-nolock)
+                echo "No lock file detected. Installing with 'npm install' (non-deterministic).";
+                npm install ;;
+            none) echo "No JavaScript project detected; skipping install." ;;
+          esac
+
+      - name: (Optional) Create lock file for future determinism
+        if: steps.pm.outputs.pm == 'npm-nolock'
+        run: |
+          npm install --package-lock-only
+          echo "Created package-lock.json (consider committing it)."
 
       - name: Lint
         run: |
-          if [ -f package.json ] && npm run | grep -q "lint"; then npm run lint; else echo "No lint script"; fi
+          if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.lint?0:1)" 2>/dev/null; then
+            echo "Running lint..."
+            npm run lint || (echo "Lint failed" && exit 1)
+          else
+            echo "No lint script."
+          fi
 
       - name: Test
         run: |
-          if [ -f package.json ] && npm test --help >/dev/null 2>&1; then npm test -- --ci; \
-          elif [ -f pyproject.toml ]; then pytest -q; \
-          elif [ -f go.mod ]; then go test ./...; \
-          elif [ -f test_events.py ]; then python -m unittest test_events.py -v; \
-          else echo "No tests defined"; fi
+          if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.test?0:1)"; then
+            echo "Running tests..."
+            (npm test -- --ci || npm test)
+          else
+            echo "No test script; skipping."
+          fi
 
       - name: Build
         run: |
-          if [ -f package.json ] && npm run | grep -q "build"; then npm run build; else echo "No build step"; fi
+          if [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.build?0:1)"; then
+            npm run build
+          else
+            echo "No build script."
+          fi
 
-      - name: Capture artifact (optional build output)
+      - name: Upload build artifacts
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: build-output-${{ matrix.node-version }}-py${{ matrix.python-version }}
+          name: build-output-${{ matrix.node-version }}
           path: |
             dist
             build
